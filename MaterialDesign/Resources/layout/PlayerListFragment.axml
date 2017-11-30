@@ -10,16 +10,11 @@
         android:layout_height="match_parent"
         android:paddingLeft="10dp"
         android:paddingRight="10dp">
-        <ListView
-            android:id="@+id/listView"
+        <android.support.v7.widget.RecyclerView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbarAlwaysDrawVerticalTrack="true"
-            android:listSelector="@android:color/transparent"
-            android:divider="@null"
-            android:dividerHeight="0dp"
-            android:paddingBottom="80dp"
-            android:clipToPadding="false"
+            android:scrollbars="vertical"
+            android:id="@+id/recyclerView"
             tools:listitem="@layout/PlayerListViewRow" />
     </LinearLayout>
 </FrameLayout>

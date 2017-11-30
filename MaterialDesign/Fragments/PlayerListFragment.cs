@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using Android.OS;
+using Android.Support.V7.Widget;
 using Android.Views;
 using Android.Widget;
 using MaterialDesign.Adapters;
 using MaterialDesign.Infrastucture;
 using MaterialDesign.Model;
 using Newtonsoft.Json;
+using Orientation = Android.Content.Res.Orientation;
 
 namespace MaterialDesign.Fragments
 {
@@ -45,15 +47,29 @@ namespace MaterialDesign.Fragments
         /// <param name="savedInstanceState"></param>
         public override void OnViewCreated(View view, Bundle savedInstanceState)
         {
-            var adapter = new PlayerAdapter(Activity, Resource.Layout.PlayerListViewRow, Players.ToArray());
-            var listView = view.FindViewById<ListView>(Resource.Id.listView);
-            listView.Adapter = adapter;
-
-            listView.ItemClick += (sender, args) =>
+            var adapter = new PlayerAdapter(Activity, Players.ToArray());
+            adapter.PlayerClicked += (sender, player) =>
             {
-                var itemAtPosition = listView.GetItemAtPosition(args.Position);
-                OnPlayerClicked(itemAtPosition.Cast<Player>());
+                Toast.MakeText(Activity, player.Name, ToastLength.Short).Show();
             };
+
+            var recyclerView = view.FindViewById<RecyclerView>(Resource.Id.recyclerView);
+            recyclerView.SetLayoutManager(GetLayoutManager());
+            recyclerView.SetAdapter(adapter);
+        }
+
+        private LinearLayoutManager GetLayoutManager()
+        {
+            if (Activity.IsTablet())
+            {
+                return new GridLayoutManager(Activity, GetItemsPerRow());
+            }
+            return new LinearLayoutManager(Activity, LinearLayoutManager.Vertical, false);
+        }
+
+        private int GetItemsPerRow()
+        {
+            return Activity.Resources.Configuration.Orientation == Orientation.Portrait ? 2 : 3;
         }
 
         public override void OnSaveInstanceState(Bundle outState)
@@ -64,13 +80,5 @@ namespace MaterialDesign.Fragments
             base.OnSaveInstanceState(outState);
         }
 
-        public event EventHandler<Player> PlayerClicked;
-
-        protected virtual void OnPlayerClicked(Player player)
-        {
-            PlayerClicked?.Invoke(this, player);
-        }
-
-        
     }
 }

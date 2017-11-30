@@ -1,5 +1,6 @@
-﻿using Android.Content;
-using Android.Runtime;
+﻿using System;
+using Android.Content;
+using Android.Support.V7.Widget;
 using Android.Views;
 using Android.Widget;
 using MaterialDesign.Model;
@@ -7,58 +8,60 @@ using Square.Picasso;
 
 namespace MaterialDesign.Adapters
 {
-    public class PlayerAdapter : ArrayAdapter<Player>
+    public class PlayerAdapter : RecyclerView.Adapter
     {
-        private readonly int _textViewResourceId;
         private readonly Context _context;
         private readonly Player[] _players;
 
-        public PlayerAdapter(Context context, int textViewResourceId, Player[] players) : base(context, textViewResourceId, players)
+        public event EventHandler<Player> PlayerClicked;
+
+        protected virtual void OnPlayerClicked(Player player)
         {
-            _textViewResourceId = textViewResourceId;
+            PlayerClicked?.Invoke(this, player);
+        }
+
+        public PlayerAdapter(Context context, Player[] players)
+        {
             _context = context;
             _players = players;
         }
 
-        public override View GetView(int position, View convertView, ViewGroup parent)
+        public override void OnBindViewHolder(RecyclerView.ViewHolder viewHolder, int position)
         {
-            View row = convertView;
-            PlayerHolder holder = null;
-
-            if (row == null)
-            {
-                LayoutInflater inflater = ((Android.App.Activity)_context).LayoutInflater;
-                row = inflater.Inflate(_textViewResourceId, parent, false);
-
-                holder = new PlayerHolder(row);
-                row.SetTag(Resource.Id.TAG_ID, holder);
-            }
-            else
-            {
-                holder = (PlayerHolder)row.GetTag(Resource.Id.TAG_ID);
-            }
-
             var player = _players[position];
+
+            var holder = viewHolder as PlayerHolder;
             holder.Name.Text = player.Name;
             holder.Team.Text = player.Team;
             Picasso.With(_context).Load(player.ImageUrl).Into(holder.ImageUrl);
-
-            return row;
         }
 
-        private class PlayerHolder : Java.Lang.Object
+        public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
         {
-            public PlayerHolder(View view)
+            //Setup and inflate your layout here
+            var itemView = LayoutInflater.From(parent.Context).Inflate(Resource.Layout.PlayerListViewRow, parent, false);
+            return new PlayerHolder(itemView, position =>
             {
-                ImageUrl = view.FindViewById<ImageView>(Resource.Id.image);
-                Name = view.FindViewById<TextView>(Resource.Id.name);
-                Team = view.FindViewById<TextView>(Resource.Id.team);
-            }
-
-            public ImageView ImageUrl { get; private set; }
-            public TextView Name { get; private set; }
-            public TextView Team { get; private set; }
+                var player = _players[position];
+                OnPlayerClicked(player);
+            });
         }
 
+        public override int ItemCount => _players.Length;
+    }
+
+    public class PlayerHolder : RecyclerView.ViewHolder
+    {
+        public PlayerHolder(View view, Action<int> onClick) : base(view)
+        {
+            ImageUrl = view.FindViewById<ImageView>(Resource.Id.image);
+            Name = view.FindViewById<TextView>(Resource.Id.name);
+            Team = view.FindViewById<TextView>(Resource.Id.team);
+            view.Click += (sender, e) => onClick(base.AdapterPosition);
+        }
+
+        public ImageView ImageUrl { get; private set; }
+        public TextView Name { get; private set; }
+        public TextView Team { get; private set; }
     }
 }

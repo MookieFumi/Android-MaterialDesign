@@ -29,4 +29,14 @@
   <style name="PopupTheme" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
     <item name="android:background">@color/colorPrimary</item>
   </style>
+
+  <style name="PrimaryFlatButton" parent="Theme.AppCompat.Light">
+    <item name="android:buttonStyle">
+      @style/Widget.AppCompat.Button.Borderless.Colored
+    </item>
+    <item name="colorControlHighlight">@color/colorControlHighlight</item>
+    <item name="colorAccent">@color/colorAccent</item>
+  </style>
+  
 </resources>
+
