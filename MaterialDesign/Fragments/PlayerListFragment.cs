@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Android.OS;
+using Android.Support.Design.Widget;
 using Android.Support.V7.Widget;
 using Android.Views;
 using Android.Widget;
-using Clans.Fab;
 using MaterialDesign.Adapters;
 using MaterialDesign.Infrastucture;
 using MaterialDesign.Model;
@@ -47,7 +47,7 @@ namespace MaterialDesign.Fragments
         public override void OnViewCreated(View view, Bundle savedInstanceState)
         {
             //https://github.com/fabionuno/FloatingActionButton-Xamarin.Android
-            var fabButton = view.FindViewById<FloatingActionButton>(Resource.Id.fab);
+            var fabButton = view.FindViewById<Clans.Fab.FloatingActionButton>(Resource.Id.fab);
             fabButton.Click += (sender, args) =>
             {
                 Toast.MakeText(Activity, "FAB clicked", ToastLength.Short).Show();
@@ -56,7 +56,10 @@ namespace MaterialDesign.Fragments
             var playerAdapter = new PlayerAdapter(Activity, Players.ToArray());
             playerAdapter.PlayerClicked += (sender, player) =>
             {
-                Toast.MakeText(Activity, player.Name, ToastLength.Short).Show();
+                Snackbar
+                    .Make(view, "Message sent", Snackbar.LengthShort)
+                    //.SetAction("Undo", (view) => { /*Undo message sending here.*/ })
+                    .Show(); // Don’t forget to show!
             };
             playerAdapter.DetailClicked += (sender, player) =>
             {
@@ -66,7 +69,6 @@ namespace MaterialDesign.Fragments
             {
                 Toast.MakeText(Activity, $"Selection clicked: {player.Name}", ToastLength.Short).Show();
             };
-
 
             var recyclerView = view.FindViewById<RecyclerView>(Resource.Id.recyclerView);
             recyclerView.SetLayoutManager(GetLayoutManager());
