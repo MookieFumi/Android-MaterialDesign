@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Android.OS;
 using Android.Support.V7.Widget;
 using Android.Views;
 using Android.Widget;
+using Clans.Fab;
 using MaterialDesign.Adapters;
 using MaterialDesign.Infrastucture;
 using MaterialDesign.Model;
 using Newtonsoft.Json;
-using Orientation = Android.Content.Res.Orientation;
 
 namespace MaterialDesign.Fragments
 {
@@ -47,29 +46,43 @@ namespace MaterialDesign.Fragments
         /// <param name="savedInstanceState"></param>
         public override void OnViewCreated(View view, Bundle savedInstanceState)
         {
-            var adapter = new PlayerAdapter(Activity, Players.ToArray());
-            adapter.PlayerClicked += (sender, player) =>
+            //https://github.com/fabionuno/FloatingActionButton-Xamarin.Android
+            var fabButton = view.FindViewById<FloatingActionButton>(Resource.Id.fab);
+            fabButton.Click += (sender, args) =>
+            {
+                Toast.MakeText(Activity, "FAB clicked", ToastLength.Short).Show();
+            };
+
+            var playerAdapter = new PlayerAdapter(Activity, Players.ToArray());
+            playerAdapter.PlayerClicked += (sender, player) =>
             {
                 Toast.MakeText(Activity, player.Name, ToastLength.Short).Show();
             };
+            playerAdapter.DetailClicked += (sender, player) =>
+            {
+                Toast.MakeText(Activity, $"Detail clicked: {player.Name}", ToastLength.Short).Show();
+            };
+            playerAdapter.SelectionClicked += (sender, player) =>
+            {
+                Toast.MakeText(Activity, $"Selection clicked: {player.Name}", ToastLength.Short).Show();
+            };
+
 
             var recyclerView = view.FindViewById<RecyclerView>(Resource.Id.recyclerView);
             recyclerView.SetLayoutManager(GetLayoutManager());
-            recyclerView.SetAdapter(adapter);
+            recyclerView.SetAdapter(playerAdapter);
         }
 
         private LinearLayoutManager GetLayoutManager()
         {
-            if (Activity.IsTablet())
-            {
-                return new GridLayoutManager(Activity, GetItemsPerRow());
-            }
-            return new LinearLayoutManager(Activity, LinearLayoutManager.Vertical, false);
+            return Activity.IsTablet() ? 
+                new GridLayoutManager(Activity, GetItemsPerRow()) : 
+                new LinearLayoutManager(Activity, LinearLayoutManager.Vertical, false);
         }
 
         private int GetItemsPerRow()
         {
-            return Activity.Resources.Configuration.Orientation == Orientation.Portrait ? 2 : 3;
+            return Activity.Resources.Configuration.Orientation == Android.Content.Res.Orientation.Portrait ? 2 : 3;
         }
 
         public override void OnSaveInstanceState(Bundle outState)

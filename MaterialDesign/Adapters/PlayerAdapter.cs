@@ -20,6 +20,20 @@ namespace MaterialDesign.Adapters
             PlayerClicked?.Invoke(this, player);
         }
 
+        public event EventHandler<Player> DetailClicked;
+
+        protected virtual void OnDetailClicked(Player player)
+        {
+            DetailClicked?.Invoke(this, player);
+        }
+
+        public event EventHandler<Player> SelectionClicked;
+
+        protected virtual void OnSelectionClicked(Player player)
+        {
+            SelectionClicked?.Invoke(this, player);
+        }
+
         public PlayerAdapter(Context context, Player[] players)
         {
             _context = context;
@@ -29,11 +43,19 @@ namespace MaterialDesign.Adapters
         public override void OnBindViewHolder(RecyclerView.ViewHolder viewHolder, int position)
         {
             var player = _players[position];
-
             var holder = viewHolder as PlayerHolder;
+
+            Picasso.With(_context).Load(player.ImageUrl).Into(holder.ImageUrl);
             holder.Name.Text = player.Name;
             holder.Team.Text = player.Team;
-            Picasso.With(_context).Load(player.ImageUrl).Into(holder.ImageUrl);
+            holder.DetailsButton.Click += (sender, args) =>
+            {
+                OnDetailClicked(player);
+            };
+            holder.SelectionButton.Click += (sender, args) =>
+            {
+                OnSelectionClicked(player);
+            };
         }
 
         public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
@@ -54,14 +76,20 @@ namespace MaterialDesign.Adapters
     {
         public PlayerHolder(View view, Action<int> onClick) : base(view)
         {
+            view.Click += (sender, e) => onClick(base.AdapterPosition);
+
             ImageUrl = view.FindViewById<ImageView>(Resource.Id.image);
             Name = view.FindViewById<TextView>(Resource.Id.name);
             Team = view.FindViewById<TextView>(Resource.Id.team);
-            view.Click += (sender, e) => onClick(base.AdapterPosition);
+
+            DetailsButton = view.FindViewById<Button>(Resource.Id.detailsButton);
+            SelectionButton = view.FindViewById<Button>(Resource.Id.selectionButton);
         }
 
-        public ImageView ImageUrl { get; private set; }
-        public TextView Name { get; private set; }
-        public TextView Team { get; private set; }
+        public ImageView ImageUrl { get; }
+        public TextView Name { get; }
+        public TextView Team { get; }
+        public Button SelectionButton { get; }
+        public Button DetailsButton { get; }
     }
 }
