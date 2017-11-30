@@ -5,6 +5,7 @@ using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
 using MaterialDesign.Adapters;
+using MaterialDesign.Infrastucture.Transformers;
 
 namespace MaterialDesign.Activities
 {
@@ -24,6 +25,7 @@ namespace MaterialDesign.Activities
             var mainPageAdapter = new MainPageAdapter(SupportFragmentManager);
             var viewPager = FindViewById<ViewPager>(Resource.Id.viewPager);
             viewPager.Adapter = mainPageAdapter;
+            viewPager.SetPageTransformer(true, new ScaleTransformer());
         }
 
         private void SetupToolbar()
