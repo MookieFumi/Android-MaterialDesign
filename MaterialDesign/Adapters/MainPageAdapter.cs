@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Android.Support.V4.App;
 using Java.Lang;
@@ -9,47 +10,40 @@ namespace MaterialDesign.Adapters
 {
     public class MainPageAdapter : FragmentPagerAdapter
     {
+        private readonly List<MainPageTab> _tabs;
         public MainPageAdapter(FragmentManager fragmentManager) : base(fragmentManager)
         {
+            var players = new PlayersServices().GetPlayers().ToList();
+            _tabs = new List<MainPageTab>
+            {
+                new MainPageTab(PlayerListFragment.NewInstance(players), "All players") ,
+                new MainPageTab(PlayerListFragment.NewInstance(players.Where(p =>p.Country.Equals("Spain", StringComparison.InvariantCultureIgnoreCase))), "Spanish players"),
+                new MainPageTab(PlayerListFragment.NewInstance(players.Where(p =>p.Country.Equals("United States", StringComparison.InvariantCultureIgnoreCase))),"USA players")
+            };
         }
 
-        public override int Count => 3;
+        public override int Count => _tabs.Count;
 
         public override ICharSequence GetPageTitleFormatted(int position)
         {
-            var title = string.Empty;
-
-            switch (position)
-            {
-                case 0:
-                    title = "All players";
-                    break;
-                case 1:
-                    title = "USA players";
-                    break;
-                case 2:
-                    title = "Spanish players";
-                    break;
-            }
-
-            return new Java.Lang.String(title.ToUpper());
+            return new Java.Lang.String(_tabs.ElementAt(position).Title.ToUpper());
         }
 
         public override Fragment GetItem(int position)
         {
-            var players = new PlayersServices().GetPlayers();
+            return _tabs.ElementAt(position).Fragment;
+        }
 
-            switch (position)
+        public class MainPageTab
+        {
+            public MainPageTab(Fragment fragment, string title)
             {
-                case 0:
-                    return PlayerListFragment.NewInstance(players);
-                case 1:
-                    return PlayerListFragment.NewInstance(players.Where(p => p.Country.Equals("United States", StringComparison.InvariantCultureIgnoreCase)));
-                case 2:
-                    return PlayerListFragment.NewInstance(players.Where(p => p.Country.Equals("Spain", StringComparison.InvariantCultureIgnoreCase)));
-                default:
-                    return null;
+                Fragment = fragment;
+                Title = title;
             }
+
+            public Fragment Fragment { get; }
+            public string Title { get; }
         }
     }
 }
